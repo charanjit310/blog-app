@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #14161c;
+  --bg-elevated: #1c1f27;
+  --ink: #ece9e2;
+  --muted: #8b8f9b;
+  --accent: #d8a34e;
+  --accent-soft: #d8a34e1a;
+  --border: #2a2d37;
+  --danger: #c25b4a;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-border: var(--border);
+  --color-danger: var(--danger);
+  /*
+   * System font stacks by design — no external font request at build or
+   * runtime. Swap these for next/font/google (Fraunces / Inter / JetBrains
+   * Mono) in one line if the deploy environment has open internet access;
+   * next/font self-hosts the files at build time, so it's purely a
+   * "do we have egress at build time" call, not a runtime tradeoff.
+   */
+  --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+  --font-sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+/* Visible keyboard focus everywhere, not just a browser default outline */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
