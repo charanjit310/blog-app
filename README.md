@@ -4,7 +4,7 @@ A small blog with full Create / Read / Update / Delete, built on the Next.js
 App Router. Data is sourced from [JSONPlaceholder](https://jsonplaceholder.typicode.com),
 proxied through this app's own API layer.
 
-Stack: **Next.js 16** (App Router, Turbopack) · **React 19** · **TypeScript** ·
+Stack: **Next.js 16** (App Router, Turbopack) · **React 19** · **JavaScript** ·
 **Tailwind CSS 4** · **Zod**
 
 ## Running it
@@ -24,24 +24,24 @@ This is meant to double as a short tour of App Router patterns, not just a
 working demo. The things worth pointing out in a walkthrough:
 
 ### 1. One data-access layer, three consumers
-`src/lib/posts.ts` is the only file that knows about JSONPlaceholder. It's
+`src/lib/posts.js` is the only file that knows about JSONPlaceholder. It's
 marked `import "server-only"` so it fails the build if a Client Component
 ever imports it by mistake. Three things call it:
 
-- **Server Components** (`app/posts/page.tsx`, `app/posts/[id]/page.tsx`)
+- **Server Components** (`app/posts/page.jsx`, `app/posts/[id]/page.jsx`)
   call it directly — no HTTP round trip to our own API needed, since they
   already run on the server.
-- **Route Handlers** (`app/api/posts/route.ts`, `app/api/posts/[id]/route.ts`)
+- **Route Handlers** (`app/api/posts/route.js`, `app/api/posts/[id]/route.js`)
   wrap it in a REST-shaped API (`GET/POST /api/posts`, `GET/PUT/DELETE
   /api/posts/:id`) — this is the piece you'd point an external client or
   mobile app at.
-- **Server Actions** (`app/actions/posts.ts`) wrap it for form mutations.
+- **Server Actions** (`app/actions/posts.js`) wrap it for form mutations.
 
-If this ever moves off JSONPlaceholder onto a real database, `lib/posts.ts`
+If this ever moves off JSONPlaceholder onto a real database, `lib/posts.js`
 is the only file that changes.
 
 ### 2. Server Actions + `useActionState`, not client-side fetch, for forms
-`components/PostForm.tsx` submits via a Server Action bound to the
+`components/PostForm.jsx` submits via a Server Action bound to the
 `<form action={...}>` prop. That means the create/edit flow works even
 before client JS hydrates — `useActionState` just layers pending state and
 field-level validation errors on top. Validation runs through the same Zod
@@ -49,7 +49,7 @@ schema on both the client (`postSchema`) and inside the action, so the
 server never trusts client input.
 
 ### 3. Reads are cached and tagged; writes invalidate precisely
-Every read in `lib/posts.ts` is tagged (`posts`, `post-<id>`). Mutations
+Every read in `lib/posts.js` is tagged (`posts`, `post-<id>`). Mutations
 invalidate only the tags they affect, not the whole cache. Two APIs are
 used deliberately:
 
@@ -71,9 +71,9 @@ fetch happens per-request instead of at `next build`, which keeps the build
 resilient if the upstream API is briefly unreachable during CI.
 
 ### 5. UX states aren't an afterthought
-Every route that fetches data has a matching `loading.tsx` (skeleton, not a
-spinner) and the `/posts` segment has an `error.tsx` boundary with retry.
-`app/posts/[id]/not-found.tsx` handles a deleted/missing post distinctly
+Every route that fetches data has a matching `loading.jsx` (skeleton, not a
+spinner) and the `/posts` segment has an `error.jsx` boundary with retry.
+`app/posts/[id]/not-found.jsx` handles a deleted/missing post distinctly
 from a generic 404.
 
 ### 6. A note on "full CRUD" against a mock API
@@ -84,31 +84,35 @@ every mutation so the app behaves correctly within a session; a page
 refresh after a while will show JSONPlaceholder's original 100 posts again,
 since nothing was really saved upstream.
 
+### 7. Path aliases without TypeScript
+The `@/*` import alias (`@/lib/posts`, `@/components/PostForm`, etc.) is
+configured via `jsconfig.json` instead of `tsconfig.json` — same mechanism
+Next.js uses for TS projects, just the plain-JS equivalent.
+
 ## Project structure
 
 ```
 src/
 ├── app/
-│   ├── page.tsx                  # Landing page
+│   ├── page.jsx                  # Landing page
 │   ├── posts/
-│   │   ├── page.tsx               # Archive (list) — Server Component
-│   │   ├── loading.tsx / error.tsx
-│   │   ├── new/page.tsx           # Create form
+│   │   ├── page.jsx               # Archive (list) — Server Component
+│   │   ├── loading.jsx / error.jsx
+│   │   ├── new/page.jsx           # Create form
 │   │   └── [id]/
-│   │       ├── page.tsx           # Post detail — Server Component
-│   │       ├── loading.tsx / not-found.tsx
-│   │       └── edit/page.tsx      # Edit form
-│   ├── api/posts/route.ts         # REST: GET list, POST create
-│   ├── api/posts/[id]/route.ts    # REST: GET/PUT/DELETE one
-│   └── actions/posts.ts           # Server Actions for form mutations
+│   │       ├── page.jsx           # Post detail — Server Component
+│   │       ├── loading.jsx / not-found.jsx
+│   │       └── edit/page.jsx      # Edit form
+│   ├── api/posts/route.js         # REST: GET list, POST create
+│   ├── api/posts/[id]/route.js    # REST: GET/PUT/DELETE one
+│   └── actions/posts.js           # Server Actions for form mutations
 ├── components/
-│   ├── PostForm.tsx                # Shared create/edit form (Client Component)
-│   ├── PostListItem.tsx
-│   └── DeleteButton.tsx
-├── lib/
-│   ├── posts.ts                    # Data access layer (server-only)
-│   └── validation.ts                # Shared Zod schema
-└── types/post.ts
+│   ├── PostForm.jsx                # Shared create/edit form (Client Component)
+│   ├── PostListItem.jsx
+│   └── DeleteButton.jsx
+└── lib/
+    ├── posts.js                    # Data access layer (server-only)
+    └── validation.js                # Shared Zod schema
 ```
 
 ## Testing the REST API directly

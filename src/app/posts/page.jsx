@@ -1,12 +1,11 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { getPosts } from "@/lib/posts";
 import { PostListItem } from "@/components/PostListItem";
 
-// See the note in app/page.tsx — render on request, not at build time.
+// See the note in app/page.jsx — render on request, not at build time.
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Archive",
   description: "Every entry, newest first.",
 };
@@ -26,7 +25,6 @@ export default async function PostsPage() {
             {posts.length} entries
           </h1>
         </div>
-
         <Link
           href="/posts/new"
           className="font-mono text-xs uppercase tracking-widest text-muted hover:text-accent transition-colors"
